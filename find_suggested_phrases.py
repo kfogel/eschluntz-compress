@@ -12,6 +12,8 @@ a 'Shortcut' is a joint 'Phrase' and 'Abbreviation'.
 """
 
 import os
+import re
+import argparse
 from typing import List, Dict, Tuple
 from collections import Counter, namedtuple
 from nltk.util import ngrams
@@ -150,6 +152,43 @@ def save_shortcuts(shortcuts: Dict[str, str]) -> None:
 
 
 if __name__ == "__main__":
+
+    argparser = argparse.ArgumentParser(
+        prog='find_suggested_phrases',
+        description='Derive suggested phrases from an input corpus.',
+        epilog='See https://github.com/eschluntz/compress/ for more information.')
+
+    argparser.add_argument('--data-dir', nargs=1,
+                           help="Root of input data directory tree.  "
+                           "See also '--input-file-re'.\n"
+                           "If no '--data-dir' option is supplied, take input "
+                           "from stdin.")
+    argparser.add_argument('--input-file-re', nargs='*',
+                           default=[re.compile(".*\\.txt$"),],
+                           help="Regexp matching input file names under "
+                           "data direrctor (see also '--data-dir').\n"
+                           "You can use this option multiple times, with a "
+                           "different regexp for each instance.\n"
+                           "Default is one instance of \".*\\\\.txt$\"")
+    ### KFF TODO:
+    #
+    # Some command lines to try:
+    #
+    #   $ source venv/bin/activate
+    #   venv$ ./find_suggested_phrases.py --data-dir "./data/corpus" --input-file-re="fish" --input-file-re="food"
+    #   DEBUG: Namespace(data_dir=['./data/corpus'], input_file_re=['food'])
+    #   venv$ @compress>./find_suggested_phrases.py --data-dir "./data/corpus"
+    #   DEBUG: Namespace(data_dir=['./data/corpus'], input_file_re=[re.compile('.*\\.txt$')])
+    #   venv$ 
+    #
+    # So the two problems right now are:
+    # 
+    #   1. How to do repeated option in argparse()?
+    #   2. Is the re.compile() call being evaluated?  (Maybe -- but check.)
+    args = argparser.parse_args()
+    import sys
+    sys.stderr.write(f"DEBUG: {args}\n")
+    sys.exit(0)
 
     texts = load_corpus()
     all_counts = corpus_to_ngrams(texts, 4)
